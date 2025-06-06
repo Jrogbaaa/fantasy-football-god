@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pprChatService } from '@/lib/replicate';
-import { SleeperAPIClient } from '@/lib/sleeper-api';
+import { sleeperAPI } from '@/lib/sleeper-api';
 import type { ChatMessage } from '@/types';
-
-const sleeperAPI = new SleeperAPIClient();
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +21,10 @@ export async function POST(request: NextRequest) {
     
     if (playerMentions.length > 0) {
       try {
-        relevantPlayers = await sleeperAPI.getPlayersByIds(playerMentions);
+        relevantPlayers = await Promise.all(
+          playerMentions.map(id => sleeperAPI.getPlayer(id))
+        );
+        relevantPlayers = relevantPlayers.filter(Boolean); // Remove null results
       } catch (error) {
         console.warn('Failed to fetch player data:', error);
       }
@@ -32,8 +33,7 @@ export async function POST(request: NextRequest) {
     // Generate response using Replicate Llama
     const response = await pprChatService.generateResponse(
       message,
-      messages,
-      relevantPlayers
+      messages
     );
 
     return NextResponse.json({
@@ -52,7 +52,8 @@ export async function POST(request: NextRequest) {
     console.error('Chat API error:', error);
     
     // Fallback to mock response if Replicate fails
-    const fallbackResponse = generateFallbackPPRResponse(message);
+    const { message: userMessage } = await request.json();
+    const fallbackResponse = generateFallbackPPRResponse(userMessage);
     
     return NextResponse.json({
       message: fallbackResponse,
@@ -73,7 +74,7 @@ async function detectPlayerMentions(message: string): Promise<string[]> {
   try {
     const searchResults = await Promise.all(
       playerNames.slice(0, 3).map(name => // Limit to 3 players
-        sleeperAPI.searchPlayers(name, undefined, 1)
+        sleeperAPI.searchPlayers(name, 1)
       )
     );
     

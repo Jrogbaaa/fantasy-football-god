@@ -1,0 +1,84 @@
+# PPR Fantasy Football Expert Chatbot - Project Context
+
+## 🎯 PRIMARY GOAL
+Build a specialized chatbot for PPR (Points Per Reception) fantasy football advice. This is NOT a general fantasy football app - it's specifically optimized for PPR scoring format where players get 1 point per reception.
+
+## 🏗️ CORE ARCHITECTURE
+- **Frontend**: Next.js 14+ with TypeScript, App Router, Tailwind CSS, shadcn/ui
+- **Backend**: Next.js API routes, Firebase Firestore
+- **AI**: OpenAI GPT-4 with PPR-specific prompt engineering
+- **Data**: Sleeper API (free, read-only) as primary source
+- **Auth**: Firebase Authentication
+
+## 📊 PPR-SPECIFIC FOCUS
+Always remember PPR scoring means:
+- Reception-heavy players are MORE valuable (slot receivers, pass-catching RBs)
+- Target share and air yards are critical metrics
+- Matchup advice should factor in passing game volume
+- Rankings should weight receptions equally with yards/TDs
+
+## 🔑 KEY FEATURES (Priority Order)
+1. **Smart Chatbot Interface** - Main feature, must be exceptional
+2. **Real-time Player Data** - Via Sleeper API integration
+3. **PPR-Weighted Rankings** - Custom algorithm for PPR scoring
+4. **User Context Storage** - Firebase for chat history and preferences
+5. **Mobile-First Design** - Most users will be on mobile
+
+## 📁 PROJECT STRUCTURE REQUIREMENTS
+```
+src/
+├── app/
+│   ├── api/chat/          # Chatbot endpoint
+│   ├── api/players/       # Sleeper API integration
+│   └── chat/              # Main chat interface
+├── components/
+│   ├── chat/              # All chat-related components  
+│   └── ui/                # shadcn/ui components
+├── lib/
+│   ├── firebase.ts        # Use provided config JSON
+│   ├── sleeper-api.ts     # Sleeper API client
+│   └── openai.ts          # GPT-4 integration
+```
+
+## 🚫 WHAT NOT TO BUILD
+- General fantasy football tools
+- Season-long league management
+- Draft tools or mock drafts
+- Complex roster construction beyond advice
+
+## 💡 DEVELOPMENT PRINCIPLES
+- **Mobile-first**: Design for phone usage during games
+- **Speed**: Responses must be under 2 seconds
+- **Context-aware**: Remember user's previous questions in session
+- **PPR-focused**: Every feature should consider reception value
+- **Production-ready**: Write clean, typed, testable code
+
+## 🔧 TECHNICAL CONSTRAINTS
+- Use Sleeper API (docs: https://docs.sleeper.com/) - no API key needed
+- Firebase config provided in project context
+- OpenAI API for chatbot intelligence
+- No complex state management - keep it simple with React hooks
+- Responsive design required (mobile + desktop)
+
+## 📝 CODE STANDARDS
+- TypeScript strict mode
+- Proper error handling and loading states
+- Component composition over large components
+- Custom hooks for data fetching
+- Consistent naming: camelCase for variables, PascalCase for components
+
+## 🎨 UI/UX REQUIREMENTS
+- Modern chat interface with typing indicators
+- Dark/light mode support
+- Quick action buttons for common PPR questions
+- Message history with smooth scrolling
+- Loading states for all async operations
+
+## 🚀 DEPLOYMENT NOTES
+- Deploy to Vercel with GitHub integration
+- Environment variables for all API keys
+- Firebase rules for security
+- Error monitoring and analytics setup
+
+---
+**Remember**: This is a PPR-SPECIFIC tool. Every decision, feature, and recommendation should be optimized for Points Per Reception scoring format. When in doubt, prioritize reception volume and target share data.
