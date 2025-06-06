@@ -1,0 +1,205 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* PPR-specific custom styles */
+@layer components {
+  .ppr-gradient {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600;
+  }
+  
+  .ppr-gradient-hover {
+    @apply hover:from-blue-700 hover:to-purple-700;
+  }
+  
+  .message-bubble {
+    @apply rounded-lg p-4 max-w-3xl;
+  }
+  
+  .message-user {
+    @apply bg-blue-600 text-white ml-auto;
+  }
+  
+  .message-assistant {
+    @apply bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700;
+  }
+  
+  .quick-action-card {
+    @apply p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors cursor-pointer;
+  }
+  
+  .position-qb {
+    @apply text-red-600 bg-red-50 dark:bg-red-900/20;
+  }
+  
+  .position-rb {
+    @apply text-green-600 bg-green-50 dark:bg-green-900/20;
+  }
+  
+  .position-wr {
+    @apply text-blue-600 bg-blue-50 dark:bg-blue-900/20;
+  }
+  
+  .position-te {
+    @apply text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20;
+  }
+  
+  .position-k {
+    @apply text-purple-600 bg-purple-50 dark:bg-purple-900/20;
+  }
+  
+  .position-def {
+    @apply text-gray-600 bg-gray-50 dark:bg-gray-900/20;
+  }
+  
+  .injury-out {
+    @apply text-red-600;
+  }
+  
+  .injury-doubtful {
+    @apply text-red-500;
+  }
+  
+  .injury-questionable {
+    @apply text-yellow-600;
+  }
+  
+  .injury-probable {
+    @apply text-green-600;
+  }
+}
+
+/* Animations for chat interface */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Scrollbar styling */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500 dark:bg-gray-500;
+}
+
+/* Focus and accessibility improvements */
+.focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .message-bubble {
+    @apply max-w-[85vw];
+  }
+  
+  .quick-action-card {
+    @apply p-3;
+  }
+}
+
+/* Print styles (for sharing screenshots) */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    @apply text-black bg-white;
+  }
+} 

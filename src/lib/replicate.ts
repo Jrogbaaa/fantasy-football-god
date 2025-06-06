@@ -1,0 +1,179 @@
+import Replicate from 'replicate';
+import type { ChatMessage, PPRAnalysis, Player } from '@/types';
+
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN,
+});
+
+interface ReplicateResponse {
+  choices: Array<{
+    message: {
+      content: string;
+    };
+  }>;
+}
+
+export class PPRChatService {
+  private readonly model = 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3';
+
+  private buildPPRPrompt(message: string, context?: ChatMessage[]): string {
+    const systemPrompt = `You are the ultimate PPR (Points Per Reception) Fantasy Football Expert. You specialize in helping users dominate their PPR leagues where receptions are worth 1 point each.
+
+PPR SCORING SYSTEM:
+- Passing: 1 point per 25 yards, 4 points per TD
+- Rushing: 1 point per 10 yards, 6 points per TD  
+- Receiving: 1 point per 10 yards, 6 points per TD, 1 point per reception
+- Defense/ST: Variable scoring for TDs, turnovers, etc.
+
+KEY PPR PRINCIPLES:
+1. RECEPTIONS ARE KING: Players who catch more passes are more valuable
+2. Target Share Matters: High-target players are PPR gold
+3. Volume > Efficiency: 8 catches for 60 yards (14.0 pts) beats 3 catches for 80 yards (11.0 pts)
+4. Slot receivers and pass-catching RBs are premium assets
+5. Red zone touches + target share = PPR excellence
+
+PLAYER EVALUATION FOCUS:
+- Targets per game and target share percentage
+- Receptions per game (most important stat)
+- Air yards and average depth of target
+- Snap count and route participation
+- Matchup analysis: opponent pass defense vs position
+- Game script considerations (trailing teams throw more)
+
+EXPERT ANALYSIS AREAS:
+- Start/Sit decisions with PPR context
+- Waiver wire pickups focusing on target trends
+- Trade analysis emphasizing reception volume
+- Matchup breakdowns highlighting passing game opportunities
+- Weekly rankings with PPR-specific weightings
+
+Always provide confident, data-driven advice that prioritizes reception volume and target opportunity in PPR scoring format.`;
+
+    let conversationContext = '';
+    if (context && context.length > 0) {
+      conversationContext = '\n\nPrevious conversation:\n' + 
+        context.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+    }
+
+    return `${systemPrompt}${conversationContext}\n\nUser: ${message}\n\nAssistant:`;
+  }
+
+  async generateResponse(
+    message: string, 
+    context?: ChatMessage[], 
+    players?: Player[]
+  ): Promise<string> {
+    try {
+      const prompt = this.buildPPRPrompt(message, context);
+      
+      // Add player context if provided
+      let enhancedPrompt = prompt;
+      if (players && players.length > 0) {
+        const playerContext = players.map(p => 
+          `${p.full_name} (${p.position}, ${p.team}): ${p.fantasy_positions?.join('/')}`
+        ).join(', ');
+        enhancedPrompt += `\n\nRelevant players mentioned: ${playerContext}`;
+      }
+
+      const output = await replicate.run(this.model, {
+        input: {
+          prompt: enhancedPrompt,
+          max_new_tokens: 1000,
+          temperature: 0.7,
+          top_p: 0.9,
+          repetition_penalty: 1.15,
+          system_prompt: "You are a helpful assistant specialized in PPR fantasy football analysis."
+        }
+      });
+
+      // Replicate returns an array of strings for Llama
+      const response = Array.isArray(output) ? output.join('') : String(output);
+      
+      return response || "I apologize, but I couldn't generate a response right now. Please try asking your PPR question again.";
+    } catch (error) {
+      console.error('Replicate API error:', error);
+      
+      // Fallback responses for common PPR scenarios
+      if (message.toLowerCase().includes('start') || message.toLowerCase().includes('sit')) {
+        return "For PPR start/sit decisions, I always prioritize players with higher target shares and reception floors. Could you tell me which specific players you're choosing between?";
+      }
+      
+      if (message.toLowerCase().includes('waiver') || message.toLowerCase().includes('pickup')) {
+        return "For PPR waiver pickups, look for players seeing increased targets, especially those in slot positions or pass-catching backs. What position are you targeting?";
+      }
+      
+      if (message.toLowerCase().includes('trade')) {
+        return "In PPR trades, focus on acquiring players with consistent target volume rather than big-play potential. What trade are you considering?";
+      }
+      
+      return "I'm having trouble connecting right now, but I'm here to help with all your PPR fantasy football questions. Please try again!";
+    }
+  }
+
+  async analyzePPRValue(player: Player): Promise<PPRAnalysis> {
+    try {
+      const prompt = `Analyze ${player.full_name} (${player.position}, ${player.team}) for PPR fantasy value. 
+      Consider: target share, reception consistency, role in offense, upcoming matchups.
+      Provide a brief analysis focusing on PPR-specific factors.`;
+
+      const output = await replicate.run(this.model, {
+        input: {
+          prompt,
+          max_new_tokens: 500,
+          temperature: 0.6,
+          top_p: 0.9
+        }
+      });
+
+      const analysis = Array.isArray(output) ? output.join('') : String(output);
+
+      return {
+        playerId: player.player_id,
+        pprScore: this.calculatePPRScore(player),
+        analysis,
+        targetShare: player.stats?.targets || 0,
+        receptionConsistency: this.calculateConsistency(player),
+        upcomingMatchup: 'Favorable', // This would come from matchup data
+        recommendation: this.getRecommendation(player)
+      };
+    } catch (error) {
+      console.error('Error analyzing PPR value:', error);
+      return {
+        playerId: player.player_id,
+        pprScore: 0,
+        analysis: 'Analysis unavailable',
+        targetShare: 0,
+        receptionConsistency: 0,
+        upcomingMatchup: 'Unknown',
+        recommendation: 'Hold'
+      };
+    }
+  }
+
+  private calculatePPRScore(player: Player): number {
+    const stats = player.stats;
+    if (!stats) return 0;
+
+    const rushingPoints = (stats.rushing_yards || 0) / 10 + (stats.rushing_tds || 0) * 6;
+    const receivingPoints = (stats.receiving_yards || 0) / 10 + (stats.receiving_tds || 0) * 6 + (stats.receptions || 0);
+    const passingPoints = (stats.passing_yards || 0) / 25 + (stats.passing_tds || 0) * 4;
+
+    return rushingPoints + receivingPoints + passingPoints;
+  }
+
+  private calculateConsistency(player: Player): number {
+    // This would calculate game-by-game consistency
+    // For now, return a placeholder based on receptions
+    const receptions = player.stats?.receptions || 0;
+    return Math.min(receptions / 10, 1); // Normalize to 0-1 scale
+  }
+
+  private getRecommendation(player: Player): 'Buy' | 'Sell' | 'Hold' {
+    const pprScore = this.calculatePPRScore(player);
+    if (pprScore > 15) return 'Buy';
+    if (pprScore < 5) return 'Sell';
+    return 'Hold';
+  }
+}
+
+export const pprChatService = new PPRChatService(); 
