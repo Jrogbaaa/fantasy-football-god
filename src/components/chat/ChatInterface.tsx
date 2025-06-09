@@ -11,17 +11,22 @@ interface Message {
 }
 
 export const ChatInterface = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: '👋 Welcome to your PPR Fantasy Football Expert! I\'m here to help you dominate your PPR league with reception-focused insights. Ask me about start/sit decisions, waiver wire targets, trade analysis, or any PPR-specific questions.',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize the welcome message on client-side only to avoid hydration mismatch
+  useEffect(() => {
+    setMessages([
+      {
+        id: '1',
+        role: 'assistant',
+        content: '👋 Welcome to your PPR Fantasy Football Expert! I\'m here to help you dominate your PPR league with reception-focused insights. Ask me about start/sit decisions, waiver wire targets, trade analysis, or any PPR-specific questions.',
+        timestamp: new Date(),
+      },
+    ]);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
