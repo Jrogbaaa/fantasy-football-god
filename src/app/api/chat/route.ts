@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pprChatService } from '../../../lib/replicate';
-import { sleeperAPI } from '../../../lib/sleeper-api';
+import { dataCacheService } from '../../../lib/data-cache';
+import { ragKnowledgeSystem } from '../../../lib/rag-system';
 import type { ChatMessage } from '../../../types';
 
 export async function POST(request: NextRequest) {
@@ -15,10 +16,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get current NFL state for context
-    const nflState = await sleeperAPI.getNFLState();
-    const currentSeason = nflState?.season || '2024';
-    const currentWeek = nflState?.week || 1;
+    // Get current NFL state for context (from cache)
+    const cachedData = await dataCacheService.getCachedData();
+    const currentSeason = cachedData.season;
+    const currentWeek = cachedData.week;
 
     // Check for player mentions in the message
     const playerMentions = await detectPlayerMentions(message);
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (playerMentions.length > 0) {
       try {
         relevantPlayers = await Promise.all(
-          playerMentions.map(id => sleeperAPI.getPlayer(id))
+          playerMentions.map(id => dataCacheService.getPlayer(id))
         );
         relevantPlayers = relevantPlayers.filter(Boolean); // Remove null results
       } catch (error) {
@@ -36,38 +37,53 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Get trending players and top performers for current context
+    // Get trending players and top performers for current context (from cache)
     let contextData = {};
     try {
-      const [trendingAdds, nflData] = await Promise.all([
-        sleeperAPI.getTrendingPlayers('add', 24, 10),
-        sleeperAPI.getPlayers()
-      ]);
+      const trendingAdds = cachedData.trendingPlayers;
+      const nflData = cachedData.players;
 
       // Get top players by position with current teams
       const activePlayers = Object.values(nflData)
-        .filter(p => p.status === 'Active' && p.team && ['QB', 'RB', 'WR', 'TE'].includes(p.position))
-        .sort((a, b) => (a.search_rank || 999999) - (b.search_rank || 999999));
+        .filter((p: any) => p.status === 'Active' && p.team && ['QB', 'RB', 'WR', 'TE'].includes(p.position))
+        .sort((a: any, b: any) => (a.search_rank || 999999) - (b.search_rank || 999999));
 
       contextData = {
         season: currentSeason,
         week: currentWeek,
         trendingAdds: trendingAdds.slice(0, 5),
-        topQBs: activePlayers.filter(p => p.position === 'QB').slice(0, 10),
-        topRBs: activePlayers.filter(p => p.position === 'RB').slice(0, 15),
-        topWRs: activePlayers.filter(p => p.position === 'WR').slice(0, 20),
-        topTEs: activePlayers.filter(p => p.position === 'TE').slice(0, 10),
+        topQBs: activePlayers.filter((p: any) => p.position === 'QB').slice(0, 10),
+        topRBs: activePlayers.filter((p: any) => p.position === 'RB').slice(0, 15),
+        topWRs: activePlayers.filter((p: any) => p.position === 'WR').slice(0, 20),
+        topTEs: activePlayers.filter((p: any) => p.position === 'TE').slice(0, 10),
       };
     } catch (error) {
       console.warn('Failed to fetch context data:', error);
     }
 
-    // Generate response using Replicate Llama with live data
+    // Get RAG context for enhanced knowledge
+    let ragContext = '';
+    try {
+      const contextType = determineContextType(message);
+      const playerMentions = relevantPlayers.map((p: any) => p.full_name).filter(Boolean);
+      
+      ragContext = await ragKnowledgeSystem.getRAGContext({
+        query: message,
+        player_mentions: playerMentions,
+        context_type: contextType,
+        max_results: 3
+      });
+    } catch (error) {
+      console.warn('Failed to get RAG context:', error);
+    }
+
+    // Generate response using Replicate Llama with live data + RAG
     const response = await pprChatService.generateResponse(
       message,
       messages,
       relevantPlayers,
-      contextData
+      contextData,
+      ragContext
     );
 
     return NextResponse.json({
@@ -95,8 +111,8 @@ export async function POST(request: NextRequest) {
     const { message: userMessage } = await request.json();
     let fallbackContext = '';
     try {
-      const nflState = await sleeperAPI.getNFLState();
-      fallbackContext = ` (${nflState?.season || '2024'} Season Data)`;
+      const cachedData = await dataCacheService.getCachedData();
+      fallbackContext = ` (${cachedData.season} Season Data)`;
     } catch {}
     
     const fallbackResponse = generateFallbackPPRResponse(userMessage);
@@ -109,6 +125,19 @@ export async function POST(request: NextRequest) {
       note: 'Using fallback response - AI service temporarily unavailable'
     });
   }
+}
+
+// Determine the context type for RAG search
+function determineContextType(message: string): 'start_sit' | 'waiver' | 'trade' | 'matchup' | 'injury' | 'general' {
+  const lowerMessage = message.toLowerCase();
+  
+  if (lowerMessage.includes('start') || lowerMessage.includes('sit')) return 'start_sit';
+  if (lowerMessage.includes('waiver') || lowerMessage.includes('pickup')) return 'waiver';
+  if (lowerMessage.includes('trade')) return 'trade';
+  if (lowerMessage.includes('matchup') || lowerMessage.includes('vs')) return 'matchup';
+  if (lowerMessage.includes('injur') || lowerMessage.includes('hurt')) return 'injury';
+  
+  return 'general';
 }
 
 async function detectPlayerMentions(message: string): Promise<string[]> {
@@ -140,7 +169,7 @@ async function detectPlayerMentions(message: string): Promise<string[]> {
   try {
     const searchResults = await Promise.all(
       allMatches.slice(0, 5).map(name => // Limit to 5 players
-        sleeperAPI.searchPlayers(name, 3)
+        dataCacheService.searchPlayers(name, 3)
       )
     );
     

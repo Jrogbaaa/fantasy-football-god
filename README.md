@@ -1,16 +1,16 @@
 # PPR Fantasy Football Expert Chatbot
 
-> **🎯 PPR-SPECIFIC**: This chatbot is exclusively optimized for Points Per Reception fantasy football scoring. Every feature, recommendation, and analysis prioritizes reception volume and target share data.
+> **🎯 PPR-SPECIFIC AI EXPERT**: Advanced chatbot with RAG knowledge system, live data integration, and expert analysis capabilities specifically optimized for Points Per Reception fantasy football scoring.
 
 ## 🏆 What Makes This Special
 
-This isn't just another fantasy football app - it's a **PPR-focused expert system** that understands reception-heavy players are more valuable in PPR leagues. The AI is specifically trained to:
+This is a **next-generation PPR fantasy football AI system** that combines:
 
-- **Prioritize Target Share**: WRs and pass-catching RBs get premium valuations
-- **Reception Floor Analysis**: Focus on consistent target volume over boom/bust plays  
-- **PPR-Weighted Rankings**: Custom algorithms that factor in the 1-point-per-reception bonus
-- **Matchup Context**: Analyze defensive rankings against receptions, not just yards
-- **Live Data Integration**: Uses current 2024/2025 NFL season data for accurate recommendations
+- **🧠 RAG Knowledge System**: Advanced retrieval-augmented generation with expert analysis documents
+- **📊 Live Data Integration**: Real-time 2024/2025 NFL season data from Sleeper API
+- **👨‍💼 Expert Persona Modeling**: AI trained to impersonate top fantasy football analysts
+- **📈 PPR-Optimized Analysis**: Every recommendation prioritizes reception volume and target share
+- **🔄 Dynamic Data Caching**: Smart caching system for optimal performance with fresh data
 
 ## 🚀 Quick Start
 
@@ -18,7 +18,7 @@ This isn't just another fantasy football app - it's a **PPR-focused expert syste
 - Node.js 18+ 
 - npm or yarn
 - Replicate API key (for AI model)
-- Firebase project (optional - for user data)
+- Firebase project with Firestore enabled (for knowledge base)
 
 ### Environment Setup
 
@@ -31,14 +31,14 @@ REPLICATE_API_TOKEN=your-replicate-api-token
 # Sleeper API (Optional - helps with rate limits)
 SLEEPER_API_KEY=not-required-but-helps-with-rate-limits
 
-# Firebase Configuration (Optional - for user data)
+# Firebase Configuration (Required for knowledge base)
 NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=fantasy-football-god.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=fantasy-football-god
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=fantasy-football-god.firebasestorage.app
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=360165412240
-NEXT_PUBLIC_FIREBASE_APP_ID=1:360165412240:web:c0a38995af551b4fe5e8c0
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-SJQE3VJRZJ
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your-measurement-id
 
 # Production URL (Auto-set by Vercel)
 NEXT_PUBLIC_APP_URL=https://your-vercel-url.vercel.app
@@ -60,216 +60,292 @@ npm run build
 npm start
 ```
 
-Visit `http://localhost:3000` to see your PPR expert in action!
+Visit `http://localhost:3000` to see your advanced PPR expert in action!
 
 ## 💡 Core Features
+
+### 🧠 Advanced RAG Knowledge System
+- **Semantic Knowledge Retrieval**: Context-aware document search and retrieval
+- **Expert Analysis Database**: Curated fantasy football expertise from top analysts
+- **Document Processing**: Intelligent chunking and metadata extraction
+- **Dynamic Context Injection**: Relevant knowledge automatically added to AI responses
+- **Expert Persona Modeling**: AI trained to mimic communication styles of top analysts
 
 ### 🤖 PPR-Optimized AI Chatbot
 - **Meta Llama 2-70B Model**: Powered by Replicate for intelligent responses
 - **Live 2024/2025 Data**: Real-time integration with current NFL season data
-- **Smart Context**: Understands PPR scoring nuances and current player situations
-- **Player Analysis**: Real-time stats from Sleeper API with PPR context
-- **Expert Insights**: Reception-focused recommendations based on current data
+- **Context-Aware Analysis**: Understands PPR scoring nuances and current player situations
+- **Expert-Level Insights**: Reception-focused recommendations based on current data and expert knowledge
+- **Multi-Modal Responses**: Combines live data, historical analysis, and expert insights
 
-### 📊 Live Data Integration
-- **Sleeper API**: Free, comprehensive NFL player data (no API key needed!)
+### 📊 Live Data Integration & Caching
+- **Sleeper API Integration**: Comprehensive NFL player data with smart caching
+- **Dynamic Data Refresh**: 6-hour cache cycle with manual refresh capability
 - **Current Season Stats**: Live 2024/2025 reception, target, and PPR scoring data
-- **Team Updates**: Current rosters (e.g., McCaffrey on 49ers, not Panthers)
-- **Injury Reports**: Real-time player status updates
-- **Trending Players**: Live waiver wire adds/drops
+- **Team Updates**: Current rosters and depth charts
+- **Injury & News Updates**: Real-time player status and trending information
 
-### 🎯 PPR-Specific Tools
-- **Start/Sit Advisor**: Target share and matchup-based decisions with current data
-- **Waiver Wire Scanner**: Reception upside analysis with 2024/2025 trends
-- **Trade Evaluator**: PPR value assessment with current season projections
-- **Matchup Analyzer**: Live defensive rankings vs. receptions
+### 📚 Knowledge Base Management
+- **Document Upload System**: Upload and process expert analysis documents
+- **Strategy Guide Integration**: Pre-loaded 8-team PPR strategy content
+- **Expert Communication Analysis**: Flock Fantasy and other analyst style guides
+- **Advanced Metrics Library**: Air yards, TPRR, target quality analysis
+- **Contextual Retrieval**: Smart knowledge matching based on question type
+
+### 🎯 PPR-Specific Analysis Tools
+- **Start/Sit Advisor**: Target share and matchup-based decisions with expert context
+- **Waiver Wire Intelligence**: Reception upside analysis with current trends and expert insights
+- **Trade Evaluator**: PPR value assessment with expert methodology
+- **Matchup Analyzer**: Defensive rankings vs. receptions with historical context
+- **Breakout Candidate Identification**: Advanced metrics and expert analysis combined
 
 ### 🔥 Modern Tech Stack
 - **Frontend**: Next.js 15.3.3, TypeScript, Tailwind CSS
 - **UI Components**: shadcn/ui, Radix UI components
 - **Backend**: Next.js App Router API routes
-- **AI**: Replicate (Meta Llama 2-70B) with PPR-specific prompts + live data
-- **Data**: Sleeper API (primary source for live NFL data)
-- **Database**: Firebase Firestore (optional)
+- **AI**: Replicate (Meta Llama 2-70B) with RAG-enhanced prompts
+- **Data**: Sleeper API with intelligent caching system
+- **Knowledge Base**: Firebase Firestore with vector-style search
 - **Deployment**: Vercel with GitHub auto-deploy
 
-## 🏗️ Project Structure
+## 🏗️ Enhanced Project Structure
 
 ```
 src/
 ├── app/
 │   ├── api/
-│   │   ├── chat/          # AI chat endpoint with live data injection
-│   │   ├── players/       # Player data API
-│   │   └── rankings/      # PPR rankings API
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Main chat interface
+│   │   ├── chat/              # Enhanced AI chat with RAG integration
+│   │   ├── refresh-data/      # Data cache management
+│   │   ├── knowledge/         # Knowledge base operations
+│   │   ├── upload-document/   # Document processing endpoint
+│   │   ├── players/           # Player data API
+│   │   └── rankings/          # PPR rankings API
+│   ├── globals.css            # Global styles
+│   ├── layout.tsx             # Root layout
+│   └── page.tsx               # Main chat interface
 ├── components/
-│   ├── chat/              # Chat-related components
-│   │   ├── ChatInterface.tsx
-│   │   ├── MessageBubble.tsx
-│   │   └── QuickActions.tsx
-│   └── ui/                # Reusable UI components (shadcn/ui)
+│   ├── chat/                  # Advanced chat components
+│   │   ├── ChatInterface.tsx  # Enhanced with knowledge indicators
+│   │   ├── MessageBubble.tsx  # Rich message formatting
+│   │   └── QuickActions.tsx   # Context-aware quick actions
+│   └── ui/                    # Reusable UI components (shadcn/ui)
 ├── lib/
-│   ├── replicate.ts       # Replicate AI service
-│   ├── sleeper-api.ts     # Sleeper API client
-│   ├── firebase.ts        # Firebase configuration (optional)
-│   └── utils.ts           # Utility functions
-├── types/                 # TypeScript type definitions
-│   └── index.ts           # Main type exports
-└── hooks/                 # Custom React hooks
+│   ├── replicate.ts           # Replicate AI service
+│   ├── sleeper-api.ts         # Enhanced Sleeper API client
+│   ├── data-cache.ts          # Smart data caching system
+│   ├── rag-system.ts          # RAG knowledge retrieval
+│   ├── document-processor.ts  # Document processing and chunking
+│   ├── firebase.ts            # Firebase configuration
+│   └── utils.ts               # Utility functions
+├── types/                     # TypeScript type definitions
+│   └── index.ts               # Enhanced type exports
+└── hooks/                     # Custom React hooks
 ```
 
-## 🔧 API Integration
+## 🔧 Advanced API Integration
 
-### Replicate AI API
-- **Model**: Meta Llama 2-70B Chat
-- **Authentication**: API token required
-- **Features**: High-quality responses with live data injection
-- **Configuration**: Auto-configured to disable Next.js caching for real-time responses
-
+### RAG Knowledge System
 ```typescript
-// Replicate Client Configuration (from docs)
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN,
-});
+// Knowledge retrieval with context awareness
+const relevantKnowledge = await ragKnowledgeSystem.searchKnowledge(
+  userQuery,
+  contextType, // 'start_sit', 'waiver', 'trade', 'matchup', 'injury'
+  maxResults: 3
+);
 
-// Disable Next.js caching for live responses
-replicate.fetch = (url, options) => {
-  return fetch(url, { ...options, cache: "no-store" });
-};
-```
-
-### Sleeper API (Primary Data Source)
-- **Endpoint**: `https://api.sleeper.app/v1`
-- **Authentication**: None required (read-only)
-- **Data**: Current season players, stats, trending adds/drops
-- **Rate Limits**: Generous, no authentication needed
-- **Current Season**: 2024/2025 NFL season data
-
-### Live Data Flow
-```
-User Question → Extract Player Names → Fetch Current Sleeper Data → 
-Inject Live Context into AI Prompt → Replicate AI Analysis → 
-Return PPR Advice with Current Data
+// Dynamic context injection into AI prompts
+const enhancedPrompt = `${basePrompt}\n\nRelevant Expert Knowledge:\n${relevantKnowledge}`;
 ```
 
-## 🎲 Usage Examples
-
-### Start/Sit Questions (with live data)
-```
-"Should I start Christian McCaffrey or Alvin Kamara in PPR this week?"
-"Who has better PPR upside: CeeDee Lamb or Tyreek Hill?"
-```
-
-### Waiver Wire Help (current season)
-```
-"Best PPR waiver wire pickups for week 12 2024?"
-"Is Jaylen Warren worth adding for his current PPR value?"
+### Data Caching System
+```typescript
+// Smart caching with 6-hour refresh cycle
+const cachedData = await dataCacheService.getCachedData('players');
+if (dataCacheService.isCacheStale(cachedData)) {
+  await dataCacheService.refreshCache();
+}
 ```
 
-### Trade Analysis (with current rosters)
+### Document Processing
+```typescript
+// Intelligent document chunking and processing
+await documentProcessor.processDocument(
+  title,
+  content,
+  source,
+  'expert_article',
+  ['strategy', 'PPR', 'analysis']
+);
 ```
-"Trade analysis: My Travis Kelce for their Josh Jacobs in PPR"
-"PPR value comparison between Stefon Diggs and DeVonta Smith in 2024"
+
+## 🎯 Knowledge Base Content
+
+### Pre-Loaded Expert Analysis
+- **8-Team PPR Strategy Guide**: Comprehensive shallow league tactics
+- **Flock Fantasy Communication Analysis**: Expert persona modeling and evaluation methods
+- **Advanced Metrics Library**: TPRR, air yards, target quality metrics
+- **Injury Impact Analysis**: Historical injury effects on fantasy production
+- **Weather Impact Studies**: Environmental factors affecting player performance
+
+### Expert Communication Styles
+- **Flock Fantasy**: High-energy, upside-focused analysis with specific vocabulary
+- **PPR Optimization**: Reception volume prioritization and target share analysis
+- **Advanced Statistics**: Metrics-driven evaluation with contextual understanding
+- **Risk Assessment**: Injury, situation, and opportunity evaluation frameworks
+
+## 🎲 Enhanced Usage Examples
+
+### Advanced Analysis (with RAG knowledge)
+```
+"Should I start Bucky Irving or Rachaad White in PPR? Include expert analysis."
+"What does Flock Fantasy think about Xavier Legette's upside this week?"
+"Give me a deep dive on CeeDee Lamb's target share trends with expert context."
+```
+
+### Knowledge-Enhanced Recommendations
+```
+"Best PPR waiver wire pickups based on expert analysis and current data?"
+"Trade evaluation with expert methodology: My Travis Kelce for Josh Jacobs?"
+"What advanced metrics support starting Tee Higgins in PPR this week?"
+```
+
+### Expert Persona Queries
+```
+"How would Flock Fantasy evaluate this trade?"
+"Give me the expert take on rookie tight end breakout potential."
+"What's the advanced stats perspective on air yards leaders this week?"
 ```
 
 ## 🚀 Deployment
 
-### Vercel (Recommended - Current Setup)
-
-#### Via GitHub (Current Workflow)
-```bash
-# 1. Commit changes
-git add -A
-git commit -m "Your changes"
-git push origin main
-
-# 2. Auto-deployment triggers on Vercel
-# 3. Set environment variables in Vercel dashboard
+### Required Vercel Environment Variables
 ```
-
-#### Environment Variables in Vercel
-Set these in your Vercel project dashboard:
-
-```
+# Core API Keys
 REPLICATE_API_TOKEN=r8_your_token_here
-SLEEPER_API_KEY=not-required-but-helps-with-rate-limits
+SLEEPER_API_KEY=optional_but_helpful
+
+# Firebase Configuration (Required for knowledge base)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your-measurement-id
+
+# Application Settings
 NODE_ENV=production
 NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
-
-# Firebase (if using)
-NEXT_PUBLIC_FIREBASE_API_KEY=your_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-domain.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
-# ... (other Firebase vars)
 ```
 
-#### Best Practices (Based on Next.js + Replicate Docs)
-- **GitHub Integration**: Auto-deploy on push to main
-- **Environment Variables**: Set in Vercel dashboard, not in code
-- **Caching**: Disabled for live API responses
-- **Error Handling**: Graceful fallbacks for API failures
+### Firebase Setup Requirements
+1. **Enable Firestore API** in Google Cloud Console
+2. **Create Firestore database** in your Firebase project
+3. **Configure security rules** for knowledge base collections
+4. **Verify API permissions** are properly set
 
-## 🔒 Security & Performance
+### Deployment Checklist
+- [ ] All environment variables set in Vercel
+- [ ] Firebase Firestore API enabled
+- [ ] Replicate API token configured
+- [ ] Knowledge base initialized with sample content
+- [ ] Data cache system tested
 
-### Environment Variables (Next.js Best Practices)
-- All API keys secured in environment variables
-- `NEXT_PUBLIC_` prefix only for client-side variables
-- Replicate API token is server-side only
-- Firebase config uses public keys (safe for client)
+## 📊 Performance & Monitoring
 
-### Performance Optimizations
-- **Next.js App Router**: Server-side rendering with React 18
-- **Live Data Caching**: Disabled for real-time responses
-- **Error Boundaries**: Graceful handling of API failures
-- **Hydration Fix**: Client-side initialization prevents mismatches
+### Data Cache Performance
+- **6-Hour Cache Cycle**: Balances freshness with API efficiency
+- **Smart Refresh Logic**: Updates only when data is stale
+- **Manual Refresh Endpoint**: `/api/refresh-data` for immediate updates
+- **Cache Status Monitoring**: Built-in staleness detection
 
-### Security Features
-- **API Rate Limiting**: Handled by Replicate and Sleeper
-- **Input Validation**: Sanitized user inputs
-- **Error Handling**: No sensitive data exposed in errors
+### Knowledge Retrieval Optimization
+- **Semantic Search**: Context-aware knowledge matching
+- **Relevance Scoring**: Prioritizes most applicable expert insights
+- **Response Time**: Sub-second knowledge retrieval
+- **Memory Efficiency**: Optimized document chunking and storage
+
+## 🔒 Security & Best Practices
+
+### Knowledge Base Security
+- **Document Validation**: Input sanitization for uploaded content
+- **Access Controls**: Secure knowledge base operations
+- **Rate Limiting**: Protection against abuse
+- **Error Handling**: Graceful degradation when services unavailable
+
+### Data Privacy
+- **No User Data Storage**: Conversations are stateless
+- **API Key Security**: All sensitive keys server-side only
+- **Knowledge Base**: Public fantasy football information only
 
 ## 🐛 Troubleshooting
 
-### Common Issues
-
-#### Hydration Error #418
-**Fixed**: Initial messages now created client-side to prevent timestamp mismatches.
-
-#### Stale Data in Responses
-**Fixed**: Live data injection ensures AI uses current 2024/2025 season information.
-
-#### Replicate API Timeouts
-- Check `REPLICATE_API_TOKEN` is set correctly
-- Model cold starts can take 30-60 seconds initially
-- Production has better performance than development
-
-#### Environment Variables
+### Knowledge Base Issues
 ```bash
-# Check if variables are loaded
-console.log(process.env.REPLICATE_API_TOKEN ? 'Set' : 'Missing');
+# Check Firebase connection
+curl -X GET http://localhost:3000/api/knowledge
+
+# Test document upload
+curl -X POST http://localhost:3000/api/upload-document \
+  -H "Content-Type: application/json" \
+  -d '{"action": "upload_strategy_guide"}'
 ```
+
+### Cache Management
+```bash
+# Force data refresh
+curl -X POST http://localhost:3000/api/refresh-data
+
+# Check cache status
+# (Built into chat responses - shows data freshness)
+```
+
+### Common Firebase Issues
+- **Firestore API not enabled**: Visit Google Cloud Console and enable
+- **Permission errors**: Check Firebase security rules
+- **Connection timeouts**: Verify network connectivity and API keys
 
 ## 🤝 Contributing
 
-### Development Setup
+### Knowledge Base Expansion
+1. **Add Expert Documents**: Use `/api/upload-document` endpoint
+2. **Update Strategy Guides**: Modify `document-processor.ts`
+3. **Enhance RAG System**: Improve `rag-system.ts` search logic
+4. **Add Expert Personas**: Create new communication style guides
+
+### Development Workflow
 ```bash
+# Setup development environment
 git clone https://github.com/your-username/fantasy-football-god
 cd fantasy-football-god
 npm install
 cp .env.local.example .env.local
-# Edit .env.local with your API keys
+
+# Test all systems
 npm run dev
+# Test knowledge base at http://localhost:3000/api/knowledge
+# Test document upload at http://localhost:3000/test-upload.html
+
+# Deploy
+git add -A
+git commit -m "Enhanced features with RAG system"
+git push origin main
 ```
 
-### Deployment Workflow
-1. **Develop locally** with `npm run dev`
-2. **Test build** with `npm run build && npm start`
-3. **Commit changes** to GitHub
-4. **Auto-deploy** via Vercel integration
-5. **Monitor** in Vercel dashboard
+## 📈 Roadmap
+
+### Upcoming Features
+- **Multi-Expert Analysis**: Compare insights from different analysts
+- **Historical Performance Tracking**: Season-long accuracy monitoring
+- **Advanced Visualizations**: Charts and graphs for player trends
+- **Custom Expert Training**: Upload your own analysis style
+- **Real-Time Notifications**: Breaking news and waiver wire alerts
+
+### Knowledge Base Expansion
+- **More Expert Analysts**: Additional persona models
+- **Injury Database**: Comprehensive injury impact analysis
+- **Weather Integration**: Live weather data for outdoor games
+- **Advanced Metrics**: Additional sabermetric-style fantasy stats
 
 ## 📄 License
 
@@ -277,4 +353,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Made with ❤️ for PPR fantasy football dominance** 🏆 
+**🏆 The most advanced PPR fantasy football AI system ever built** - powered by RAG knowledge retrieval, live data integration, and expert analysis modeling. Dominate your PPR leagues with AI that thinks like the top fantasy analysts! 🧠📊 

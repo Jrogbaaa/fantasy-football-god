@@ -20,7 +20,8 @@ export class PPRChatService {
     message: string, 
     context?: ChatMessage[], 
     players?: any[], 
-    contextData?: any
+    contextData?: any,
+    ragContext?: string
   ): string {
     const systemPrompt = `You are the ultimate PPR (Points Per Reception) Fantasy Football Expert. You specialize in helping users dominate their PPR leagues where receptions are worth 1 point each.
 
@@ -96,17 +97,24 @@ Always provide confident, data-driven advice that prioritizes reception volume a
       ).join(', ');
     }
 
-    return `${systemPrompt}${currentDataContext}${playerContext}${conversationContext}\n\nUser: ${message}\n\nAssistant:`;
+    // Add RAG context if provided
+    let ragContextString = '';
+    if (ragContext) {
+      ragContextString = ragContext;
+    }
+
+    return `${systemPrompt}${currentDataContext}${playerContext}${ragContextString}${conversationContext}\n\nUser: ${message}\n\nAssistant:`;
   }
 
   async generateResponse(
     message: string, 
     context?: ChatMessage[], 
     players?: any[],
-    contextData?: any
+    contextData?: any,
+    ragContext?: string
   ): Promise<string> {
     try {
-      const prompt = this.buildPPRPrompt(message, context, players, contextData);
+      const prompt = this.buildPPRPrompt(message, context, players, contextData, ragContext);
 
       // Add timeout for development
       const timeoutPromise = new Promise((_, reject) => 
