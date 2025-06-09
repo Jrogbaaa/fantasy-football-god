@@ -187,6 +187,16 @@ export interface PPRInsight {
   priority: 'high' | 'medium' | 'low';
 }
 
+export interface PPRAnalysis {
+  playerId: string;
+  pprScore: number;
+  analysis: string;
+  targetShare: number;
+  receptionConsistency: number;
+  upcomingMatchup: string;
+  recommendation: 'Buy' | 'Sell' | 'Hold';
+}
+
 // Environment variables type safety
 declare global {
   namespace NodeJS {
