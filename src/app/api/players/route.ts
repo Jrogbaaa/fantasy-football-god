@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sleeperAPI } from '@/lib/sleeper-api';
+import { sleeperAPI } from '../../../lib/sleeper-api';
 
 export async function GET(request: NextRequest) {
   try {

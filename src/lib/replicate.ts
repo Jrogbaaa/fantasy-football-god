@@ -1,5 +1,5 @@
 import Replicate from 'replicate';
-import type { ChatMessage, PPRAnalysis, Player } from '@/types';
+import type { ChatMessage, PPRAnalysis, Player } from '../types';
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,

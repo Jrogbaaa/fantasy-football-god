@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pprChatService } from '@/lib/replicate';
-import { sleeperAPI } from '@/lib/sleeper-api';
-import type { ChatMessage } from '@/types';
+import { pprChatService } from '../../../lib/replicate';
+import { sleeperAPI } from '../../../lib/sleeper-api';
+import type { ChatMessage } from '../../../types';
 
 export async function POST(request: NextRequest) {
   try {
