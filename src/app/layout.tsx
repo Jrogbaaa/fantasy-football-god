@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
@@ -9,7 +9,6 @@ export const metadata: Metadata = {
   description: 'Get expert PPR fantasy football advice with AI-powered insights. Optimized for Points Per Reception scoring with start/sit decisions, waiver wire targets, and trade analysis.',
   keywords: ['PPR', 'fantasy football', 'AI', 'start sit', 'waiver wire', 'points per reception'],
   authors: [{ name: 'PPR Fantasy Expert' }],
-  viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
   openGraph: {
     title: 'PPR Fantasy Football Expert',
@@ -22,6 +21,12 @@ export const metadata: Metadata = {
     title: 'PPR Fantasy Football Expert',
     description: 'AI-powered PPR fantasy football advice and insights',
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({

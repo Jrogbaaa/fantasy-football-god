@@ -75,16 +75,23 @@ Always provide confident, data-driven advice that prioritizes reception volume a
         enhancedPrompt += `\n\nRelevant players mentioned: ${playerContext}`;
       }
 
-      const output = await replicate.run(this.model, {
+      // Add timeout for development
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 30000) // 30 second timeout
+      );
+
+      const replicatePromise = replicate.run(this.model, {
         input: {
           prompt: enhancedPrompt,
-          max_new_tokens: 1000,
+          max_new_tokens: 800, // Reduced for faster response
           temperature: 0.7,
           top_p: 0.9,
           repetition_penalty: 1.15,
           system_prompt: "You are a helpful assistant specialized in PPR fantasy football analysis."
         }
       });
+
+      const output = await Promise.race([replicatePromise, timeoutPromise]);
 
       // Replicate returns an array of strings for Llama
       const response = Array.isArray(output) ? output.join('') : String(output);

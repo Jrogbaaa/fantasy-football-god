@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SleeperAPIClient } from '@/lib/sleeper-api';
-
-const sleeperAPI = new SleeperAPIClient();
+import { sleeperAPI } from '@/lib/sleeper-api';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,12 +10,13 @@ export async function GET(request: NextRequest) {
 
     if (query) {
       // Search for specific players
-      const players = await sleeperAPI.searchPlayers(query, position, limit);
+      const players = await sleeperAPI.searchPlayers(query, limit);
       return NextResponse.json({ players, success: true });
     } else {
-      // Get all players (with optional position filter)
-      const players = await sleeperAPI.getAllPlayers(position, limit);
-      return NextResponse.json({ players, success: true });
+      // Get PPR rankings (with optional position filter)
+      const players = await sleeperAPI.getPPRRankings(position || undefined);
+      const limitedPlayers = players.slice(0, limit);
+      return NextResponse.json({ players: limitedPlayers, success: true });
     }
   } catch (error) {
     console.error('Error fetching players:', error);
@@ -40,8 +39,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const players = await sleeperAPI.getPlayersByIds(playerIds);
-    return NextResponse.json({ players, success: true });
+    const players = await Promise.all(
+      playerIds.map(id => sleeperAPI.getPlayer(id))
+    );
+    const validPlayers = players.filter(Boolean);
+    return NextResponse.json({ players: validPlayers, success: true });
   } catch (error) {
     console.error('Error fetching players by IDs:', error);
     return NextResponse.json(
