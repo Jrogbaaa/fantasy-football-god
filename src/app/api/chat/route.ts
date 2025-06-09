@@ -15,9 +15,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get current NFL state for context
+    const nflState = await sleeperAPI.getNFLState();
+    const currentSeason = nflState?.season || '2024';
+    const currentWeek = nflState?.week || 1;
+
     // Check for player mentions in the message
     const playerMentions = await detectPlayerMentions(message);
     let relevantPlayers = [];
+    let currentPlayerData = {};
     
     if (playerMentions.length > 0) {
       try {
@@ -30,35 +36,75 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate response using Replicate Llama
+    // Get trending players and top performers for current context
+    let contextData = {};
+    try {
+      const [trendingAdds, nflData] = await Promise.all([
+        sleeperAPI.getTrendingPlayers('add', 24, 10),
+        sleeperAPI.getPlayers()
+      ]);
+
+      // Get top players by position with current teams
+      const activePlayers = Object.values(nflData)
+        .filter(p => p.status === 'Active' && p.team && ['QB', 'RB', 'WR', 'TE'].includes(p.position))
+        .sort((a, b) => (a.search_rank || 999999) - (b.search_rank || 999999));
+
+      contextData = {
+        season: currentSeason,
+        week: currentWeek,
+        trendingAdds: trendingAdds.slice(0, 5),
+        topQBs: activePlayers.filter(p => p.position === 'QB').slice(0, 10),
+        topRBs: activePlayers.filter(p => p.position === 'RB').slice(0, 15),
+        topWRs: activePlayers.filter(p => p.position === 'WR').slice(0, 20),
+        topTEs: activePlayers.filter(p => p.position === 'TE').slice(0, 10),
+      };
+    } catch (error) {
+      console.warn('Failed to fetch context data:', error);
+    }
+
+    // Generate response using Replicate Llama with live data
     const response = await pprChatService.generateResponse(
       message,
-      messages
+      messages,
+      relevantPlayers,
+      contextData
     );
 
     return NextResponse.json({
       message: response,
       confidence: 0.85,
-      sources: ['Llama PPR Expert', 'Sleeper API'],
+      sources: ['Llama PPR Expert', `Sleeper API (${currentSeason} Season, Week ${currentWeek})`],
       playersAnalyzed: relevantPlayers.map(p => ({
         id: p.player_id,
         name: p.full_name,
         position: p.position,
-        team: p.team
+        team: p.team,
+        status: p.status
       })),
+      contextData: {
+        season: currentSeason,
+        week: currentWeek,
+        playersScanned: Object.keys(contextData).length > 0 ? 'Live data integrated' : 'Basic data only'
+      }
     });
 
   } catch (error) {
     console.error('Chat API error:', error);
     
-    // Fallback to mock response if Replicate fails
+    // Enhanced fallback with current season info
     const { message: userMessage } = await request.json();
+    let fallbackContext = '';
+    try {
+      const nflState = await sleeperAPI.getNFLState();
+      fallbackContext = ` (${nflState?.season || '2024'} Season Data)`;
+    } catch {}
+    
     const fallbackResponse = generateFallbackPPRResponse(userMessage);
     
     return NextResponse.json({
       message: fallbackResponse,
       confidence: 0.5,
-      sources: ['PPR Fallback Expert'],
+      sources: [`PPR Fallback Expert${fallbackContext}`],
       playersAnalyzed: [],
       note: 'Using fallback response - AI service temporarily unavailable'
     });
@@ -66,22 +112,43 @@ export async function POST(request: NextRequest) {
 }
 
 async function detectPlayerMentions(message: string): Promise<string[]> {
-  // Simple player name detection - in production, this would be more sophisticated
+  // Enhanced player name detection
   const playerNames = message.match(/[A-Z][a-z]+ [A-Z][a-z]+/g) || [];
   
-  if (playerNames.length === 0) return [];
+  // Also check for common player nicknames and partial names
+  const additionalChecks = [
+    /McCaffrey/gi,
+    /CMC/gi,
+    /Mahomes/gi,
+    /Kelce/gi,
+    /Jefferson/gi,
+    /Chase/gi,
+    /Allen/gi,
+    /Burrow/gi,
+    /Lamar/gi,
+    /Hill/gi
+  ];
+
+  const allMatches = [...playerNames];
+  additionalChecks.forEach(regex => {
+    const matches = message.match(regex);
+    if (matches) allMatches.push(...matches);
+  });
+  
+  if (allMatches.length === 0) return [];
   
   try {
     const searchResults = await Promise.all(
-      playerNames.slice(0, 3).map(name => // Limit to 3 players
-        sleeperAPI.searchPlayers(name, 1)
+      allMatches.slice(0, 5).map(name => // Limit to 5 players
+        sleeperAPI.searchPlayers(name, 3)
       )
     );
     
     return searchResults
       .flat()
       .filter(player => player.player_id)
-      .map(player => player.player_id);
+      .map(player => player.player_id)
+      .slice(0, 10); // Max 10 players
   } catch (error) {
     console.warn('Error detecting player mentions:', error);
     return [];
@@ -92,75 +159,93 @@ function generateFallbackPPRResponse(message: string): string {
   const lowerMessage = message.toLowerCase();
   
   if (lowerMessage.includes('start') || lowerMessage.includes('sit')) {
-    return `For PPR start/sit decisions, I always prioritize target share and reception volume. Look for players with:
+    return `**🏈 PPR Start/Sit Advice (2024 Season):**
 
-📊 **High Target Share** (15%+ of team targets)
-🎯 **Consistent Targets** (6+ targets per game)
-🏈 **PPR Floor** (3+ receptions expected)
+For current PPR decisions, I prioritize these factors:
 
-Key PPR factors this week:
-- Slot receivers get +2 PPR value boost
-- Pass-catching RBs are premium plays
-- Target trends matter more than big-play potential
+📊 **Target Share Leaders** (15%+ team targets)
+- Slot receivers with 6+ targets/game
+- Pass-catching RBs (3+ targets minimum)
+- Red zone target hogs
 
-Would you like me to analyze specific players for PPR value?`;
+🎯 **Current Week Factors:**
+- Game script (trailing = more throws)
+- Opponent pass defense rankings
+- Injury reports affecting target distribution
+- Weather conditions for passing games
+
+**Quick PPR Formula:**
+Targets + Receptions + Favorable Matchup = Start
+Low targets + Boom/bust profile = Consider benching
+
+Share specific players for detailed 2024 analysis!`;
   }
   
   if (lowerMessage.includes('waiver') || lowerMessage.includes('pickup')) {
-    return `🔥 **PPR Waiver Wire Targets:**
+    return `**🔥 PPR Waiver Wire Strategy (Current Week):**
 
-Look for these PPR-specific indicators:
-• **Rising target share** (trending up 2+ weeks)
-• **Slot alignment** (higher reception rates)
-• **Team passing volume** (40+ attempts/game)
-• **Red zone targets** (TD upside + receptions)
+**Target These PPR Indicators:**
+• Rising target trends (3+ consecutive weeks)
+• Slot receiver promotions due to injuries
+• Pass-catching RB opportunities
+• Teams with 35+ pass attempts/game
 
-Top PPR waiver categories:
-1. **Slot WRs** - Consistent 5-8 targets
-2. **Pass-catching RBs** - 3+ targets per game  
-3. **TE streaming** - 4+ targets vs weak coverage
-4. **WR handcuffs** - Injury/bye week replacements
+**2024 Season Priorities:**
+1. **High-Volume Slots** - WRs with 8+ targets
+2. **Pass-Game RBs** - 4+ targets per game
+3. **TE Streamers** - vs weak LB coverage
+4. **Handcuff WRs** - injury replacements
 
-PPR scoring makes volume more valuable than big plays!`;
+**Avoid:** Deep threats with 3-4 targets, TD-dependent players
+
+💡 **Pro Tip:** Check target share % over past 3 weeks - that's your PPR goldmine!
+
+Need specific waiver suggestions for this week?`;
   }
   
   if (lowerMessage.includes('trade')) {
-    return `⚖️ **PPR Trade Analysis Framework:**
+    return `**⚖️ PPR Trade Analysis (2024 Values):**
 
-**PPR Value Factors:**
-• Reception volume (1 point each!)
-• Target consistency vs boom/bust
-• Team offensive scheme fit
-• Remaining schedule (pass-heavy matchups)
+**PPR Value Multipliers:**
+• **WR1s**: Premium due to target volume
+• **Pass-catching RBs**: Dual-eligibility value
+• **Elite TEs**: Positional scarcity + targets
+• **High-target WR2s**: Often better than boom/bust WR1s
 
-**PPR Winners:** Slot WRs, pass-catching RBs, high-volume TEs
-**PPR Losers:** Deep threats, TD-dependent players, low-target backs
+**2024 Trade Principles:**
+- Targets > Air yards (volume beats big plays)
+- Consistent 8+ targets > occasional 12+ targets  
+- Factor in team pass rate trends
+- Consider playoff schedule (Weeks 15-17)
 
-Key PPR trade principles:
-- Receptions = guaranteed points (value stability)
-- Target share matters more than YAC ability  
-- Consider opponent's defensive rankings vs receptions
-- Factor in team pace and passing volume trends
+**Red Flags in PPR:**
+- Players with <20% target share
+- TD-dependent without reception floor
+- Injury-prone high-target players
 
-Share the specific trade details for detailed PPR analysis!`;
+Share your specific trade scenario for detailed PPR analysis!`;
   }
   
-  return `🏈 **PPR Fantasy Expert** at your service!
+  return `**🏈 PPR Fantasy Expert (2024 Season)** 
 
-I specialize in **Points Per Reception** analysis where every catch = 1 point! 
+I analyze **current NFL data** for PPR league domination!
 
-**Ask me about:**
-• 👥 Start/sit decisions (PPR-focused)
-• 🔥 Waiver wire targets (reception upside)
-• ⚖️ Trade analysis (PPR value assessment)  
-• 🎯 Matchup breakdowns (target share focus)
-• 📊 Player rankings (reception-weighted)
+**Live Data Focus:**
+• 📊 Current target share leaders  
+• 🎯 Weekly matchup advantages
+• 🔥 Trending waiver targets
+• ⚖️ Real-time trade values
+• 📈 2024 season projections
 
-**PPR Key Principles:**
-- Target share > big-play ability
-- Slot receivers gain major value boost
-- Pass-catching RBs are premium assets
-- Consistent volume beats boom/bust
+**PPR Specialties:**
+- **Start/Sit** with current target trends
+- **Waiver** pickups based on opportunity 
+- **Trades** emphasizing reception volume
+- **Matchups** highlighting pass game spots
+- **Rankings** weighted for PPR scoring
 
-What PPR decision can I help you with today?`;
+**2024 PPR Philosophy:**
+"In PPR, 7 catches for 50 yards (12.0 pts) beats 2 catches for 80 yards (10.0 pts)"
+
+What current PPR decision can I help with?`;
 } 
